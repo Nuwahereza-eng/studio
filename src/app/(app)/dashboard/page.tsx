@@ -1,11 +1,31 @@
+
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, LineChart, Users, Droplets, DollarSign, PlusCircle, LayoutDashboard } from "lucide-react";
+import { 
+  BarChart as BarChartIcon, // Aliased lucide icon
+  LineChart as LineChartIcon, // Aliased lucide icon
+  Users, 
+  Droplets, 
+  DollarSign, 
+  PlusCircle, 
+  LayoutDashboard 
+} from "lucide-react";
 import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Line } from "recharts";
+import { 
+  Bar, 
+  BarChart, // Explicitly import BarChart component from recharts
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  ResponsiveContainer, 
+  Tooltip as RechartsTooltip, 
+  Line 
+} from "recharts";
 
 
 const chartData = [
@@ -56,7 +76,7 @@ export default function DashboardPage() {
         <StatCard title="Total Farmers" value="125" icon={Users} description="+5 this month" />
         <StatCard title="Milk Collected Today" value="1,250 L" icon={Droplets} description="Avg. 10L per farmer" />
         <StatCard title="Total Payments (Month)" value="UGX 15.5M" icon={DollarSign} description="For 12,900 Liters" />
-        <StatCard title="Quality Issues" value="3 Alerts" icon={LineChart} description="Needs attention" />
+        <StatCard title="Quality Issues" value="3 Alerts" icon={LineChartIcon} description="Needs attention" /> {/* Updated to use aliased icon */}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -68,7 +88,7 @@ export default function DashboardPage() {
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} accessibilityLayer>
+                <BarChart data={chartData} accessibilityLayer> {/* This now correctly refers to recharts' BarChart */}
                   <CartesianGrid vertical={false} />
                   <XAxis
                     dataKey="month"

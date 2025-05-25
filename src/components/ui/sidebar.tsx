@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -7,7 +8,7 @@ import { PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button, type ButtonProps } from "@/components/ui/button" // Import ButtonProps
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -259,31 +260,45 @@ const Sidebar = React.forwardRef<
 )
 Sidebar.displayName = "Sidebar"
 
+
 const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
-  React.ComponentProps<typeof Button>
->(({ className, onClick, ...props }, ref) => {
+  ButtonProps // Use ButtonProps directly
+>(({ className, onClick, children, ...props }, ref) => {
   const { toggleSidebar } = useSidebar()
+
+  const defaultChildren = (
+    <>
+      <PanelLeft className="h-5 w-5" />
+      <span className="sr-only">Toggle navigation menu</span>
+    </>
+  );
 
   return (
     <Button
       ref={ref}
       data-sidebar="trigger"
-      variant="ghost"
-      size="icon"
-      className={cn("h-7 w-7", className)}
+      variant="ghost" // Default variant, can be overridden by props
+      size="icon"   // Default size, can be overridden by props
+      className={cn("h-7 w-7", className)} // Default className, merged with passed className
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
       }}
-      {...props}
+      {...props} // Spread other props, including variant, size, and asChild if passed
     >
-      <PanelLeft />
-      <span className="sr-only">Toggle Sidebar</span>
+      {/* If children are provided (e.g. when asChild is true and a child component is passed),
+          Button component's asChild logic will handle it.
+          Otherwise, use default icon and text.
+          If asChild is true from props, Button becomes Slot; if children are also from props, Slot gets those.
+          If asChild is false, Button is <button>; if children are from props, <button> gets those, else default.
+      */}
+      {props.asChild && children ? children : (children || defaultChildren)}
     </Button>
   )
 })
 SidebarTrigger.displayName = "SidebarTrigger"
+
 
 const SidebarRail = React.forwardRef<
   HTMLButtonElement,
