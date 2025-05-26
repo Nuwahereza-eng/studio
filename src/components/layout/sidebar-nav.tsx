@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -12,6 +13,7 @@ import {
   ClipboardList,
   DollarSign,
   Briefcase,
+  LogOut, // Added LogOut icon
 } from 'lucide-react';
 import {
   Sidebar,
@@ -102,11 +104,12 @@ export function SidebarNav() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-4 mt-auto">
-        <Button variant="outline" className="w-full group-data-[collapsible=icon]:hidden">
+        <Button variant="secondary" className="w-full group-data-[collapsible=icon]:hidden"> {/* Changed variant to secondary */}
+          <LogOut className="mr-2 h-4 w-4" /> {/* Added LogOut icon */}
           Log Out
         </Button>
-         <Button variant="ghost" size="icon" className="hidden group-data-[collapsible=icon]:flex mx-auto">
-          <Settings />
+         <Button variant="ghost" size="icon" className="hidden group-data-[collapsible=icon]:flex mx-auto" tooltip={{children: "Log Out", side: "right", className: "ml-2"}}>
+          <LogOut /> {/* Changed icon to LogOut */}
         </Button>
       </SidebarFooter>
     </Sidebar>
