@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -8,7 +9,7 @@ import { mockFarmers } from "@/lib/mock-data";
 import type { Farmer } from "@/types";
 import { Users, PlusCircle, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { FarmerStatusBadge } from "@/components/shared/farmer-status-badge"; // Import the new component
 
 // Placeholder export function
 const exportFarmersToCSV = () => {
@@ -38,13 +39,9 @@ export default function FarmersPage() {
       cell: (row: Farmer) => new Date(row.joinDate).toLocaleDateString(),
     },
     {
-      accessorKey: "status", // Example of a status column
+      accessorKey: "status", 
       header: "Status",
-      cell: (row: Farmer) => (
-        <Badge variant={ Math.random() > 0.5 ? "default" : "secondary"}>
-          { Math.random() > 0.5 ? "Active" : "Inactive"}
-        </Badge>
-      )
+      cell: (row: Farmer) => <FarmerStatusBadge /> // Use the new component
     },
     {
       accessorKey: "actions",
