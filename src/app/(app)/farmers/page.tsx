@@ -9,16 +9,14 @@ import { mockFarmers } from "@/lib/mock-data";
 import type { Farmer } from "@/types";
 import { Users, PlusCircle, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FarmerStatusBadge } from "@/components/shared/farmer-status-badge"; // Import the new component
-
-// Placeholder export function
-const exportFarmersToCSV = () => {
-  console.log("Exporting farmers to CSV...");
-  alert("CSV export functionality is not yet implemented.");
-};
-
+import { FarmerStatusBadge } from "@/components/shared/farmer-status-badge";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { useToast } from "@/hooks/use-toast";
 
 export default function FarmersPage() {
+  const { toast } = useToast();
+
   const columns = [
     {
       accessorKey: "avatar",
@@ -41,7 +39,7 @@ export default function FarmersPage() {
     {
       accessorKey: "status", 
       header: "Status",
-      cell: (row: Farmer) => <FarmerStatusBadge /> // Use the new component
+      cell: (row: Farmer) => <FarmerStatusBadge /> 
     },
     {
       accessorKey: "actions",
@@ -55,6 +53,49 @@ export default function FarmersPage() {
       ),
     },
   ];
+
+  const exportFarmersToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Farmers List Report", 14, 22);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+
+    // Define columns for PDF, excluding avatar, status, and actions
+    const pdfColumns = [
+      { accessorKey: "name", header: "Name" },
+      { accessorKey: "phone", header: "Phone" },
+      { accessorKey: "location", header: "Location" },
+      { 
+        accessorKey: "joinDate", 
+        header: "Join Date",
+      },
+    ];
+
+    const tableColumnNames = pdfColumns.map(col => col.header);
+    const tableRows = mockFarmers.map(farmer => 
+      pdfColumns.map(col => {
+        if (col.accessorKey === 'joinDate') {
+          return new Date(farmer.joinDate).toLocaleDateString();
+        }
+        return (farmer as any)[col.accessorKey] ?? '';
+      })
+    );
+
+    (doc as any).autoTable({
+      head: [tableColumnNames],
+      body: tableRows,
+      startY: 30,
+      theme: 'grid',
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [85, 139, 47] }, // Primary color (approx)
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+    });
+
+    doc.save('farmers-list-report.pdf');
+    toast({ title: "PDF Exported", description: "Farmers list report has been downloaded." });
+  };
+
 
   return (
     <>
@@ -74,7 +115,7 @@ export default function FarmersPage() {
         columns={columns}
         data={mockFarmers}
         searchKey="name"
-        onExport={exportFarmersToCSV}
+        onExport={exportFarmersToPDF}
       />
     </>
   );

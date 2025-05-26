@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -23,7 +24,7 @@ interface DataTableProps<T> {
   columns: ColumnDef<T>[];
   data: T[];
   searchKey?: keyof T;
-  onExport?: () => void; // For CSV/PDF export
+  onExport?: () => void; // For PDF export
   actionButtons?: React.ReactNode; // For global actions like "Add New"
 }
 
@@ -74,7 +75,7 @@ export function DataTable<T extends { id: string }>({
           {actionButtons}
           {onExport && (
             <Button variant="outline" onClick={onExport}>
-              <Download className="mr-2 h-4 w-4" /> Export
+              <Download className="mr-2 h-4 w-4" /> Export PDF
             </Button>
           )}
         </div>

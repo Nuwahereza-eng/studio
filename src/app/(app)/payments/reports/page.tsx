@@ -9,11 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePickerWithRange } from "@/components/shared/date-picker-with-range";
 import { mockFarmers, mockPayments, milkPricePerLiter, mockMilkDeliveries } from "@/lib/mock-data";
-import type { Payment, Farmer } from "@/types";
+import type { Payment, Farmer, MilkDelivery } from "@/types"; // Added MilkDelivery
 import { CreditCard, Download, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { type DateRange } from "react-day-picker";
 import { format } from "date-fns";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 
 export default function PaymentReportsPage() {
@@ -22,17 +24,31 @@ export default function PaymentReportsPage() {
   const [generatedReport, setGeneratedReport] = useState<Payment[]>([]);
   const { toast } = useToast();
 
+  const paymentColumns = [
+    { accessorKey: "farmerName", header: "Farmer Name" },
+    { accessorKey: "period", header: "Period" },
+    { accessorKey: "amount", header: "Amount (UGX)", cell: (row: Payment) => row.amount.toLocaleString() },
+    { accessorKey: "datePaid", header: "Date Paid", cell: (row: Payment) => new Date(row.datePaid).toLocaleDateString() },
+    {
+      accessorKey: "actions",
+      header: "Export",
+      cell: (row: Payment) => (
+        <Button variant="ghost" size="sm" onClick={() => alert(`Individual PDF export for ${row.farmerName} statement coming soon.`)}>
+          <Download className="h-4 w-4" />
+        </Button>
+      ),
+    },
+  ];
+  
   const handleGenerateReport = () => {
     if (!selectedFarmer && !dateRange?.from && !dateRange?.to) {
        toast({ title: "Please select a farmer or a date range to generate a report.", variant: "destructive" });
        return;
     }
     
-    let reportData = mockPayments;
-    if(selectedFarmer && selectedFarmer !== "all") {
-        reportData = reportData.filter(p => p.farmerId === selectedFarmer);
-    }
-    
+    let reportData = mockPayments; // Default to existing mock payments for structure
+    let newReportEntries: Payment[] = [];
+
     const farmerDeliveries = mockMilkDeliveries.filter(d => 
         (!selectedFarmer || selectedFarmer === "all" || d.farmerId === selectedFarmer) &&
         dateRange?.from && new Date(d.date) >= dateRange.from &&
@@ -50,7 +66,7 @@ export default function PaymentReportsPage() {
             reportByFarmer[delivery.farmerId].deliveries.push(delivery);
         });
 
-        const newReportEntries: Payment[] = Object.keys(reportByFarmer).map(farmerIdEntry => {
+        newReportEntries = Object.keys(reportByFarmer).map(farmerIdEntry => {
             const farmerData = reportByFarmer[farmerIdEntry];
             const totalAmount = farmerData.totalQuantity * milkPricePerLiter;
             const farmerDetails = mockFarmers.find(f => f.id === farmerIdEntry);
@@ -65,35 +81,61 @@ export default function PaymentReportsPage() {
                 deliveryIds: farmerData.deliveries.map(d => d.id)
             };
         });
-
         setGeneratedReport(newReportEntries);
         toast({ title: "Report Generated", description: `Payment report(s) created for the selected criteria.` });
 
     } else if (selectedFarmer && selectedFarmer !== "all") {
-        setGeneratedReport(mockPayments.filter(p => p.farmerId === selectedFarmer));
+        // If specific farmer selected but no new deliveries, show their existing payments
+        newReportEntries = mockPayments.filter(p => p.farmerId === selectedFarmer);
+        setGeneratedReport(newReportEntries);
         toast({ title: "Showing Existing Reports", description: `No new deliveries in selected range for ${mockFarmers.find(f=>f.id === selectedFarmer)?.name}. Displaying past payments.` });
-    }
-     else {
+    } else {
+        // No specific farmer, no new deliveries in range -> empty report
         setGeneratedReport([]);
-        toast({ title: "No Data", description: "No deliveries found for the selected criteria." });
+        toast({ title: "No Data", description: "No deliveries found for the selected criteria to generate a new report." });
     }
   };
 
-  const paymentColumns = [
-    { accessorKey: "farmerName", header: "Farmer Name" },
-    { accessorKey: "period", header: "Period" },
-    { accessorKey: "amount", header: "Amount (UGX)", cell: (row: Payment) => row.amount.toLocaleString() },
-    { accessorKey: "datePaid", header: "Date Paid", cell: (row: Payment) => new Date(row.datePaid).toLocaleDateString() },
-    {
-      accessorKey: "actions",
-      header: "Export",
-      cell: (row: Payment) => (
-        <Button variant="ghost" size="sm" onClick={() => alert(`Exporting PDF for ${row.farmerName}`)}>
-          <Download className="h-4 w-4" />
-        </Button>
-      ),
-    },
-  ];
+  const exportOverallReportToPDF = () => {
+    const dataToExport = generatedReport.length > 0 ? generatedReport : mockPayments;
+    if (dataToExport.length === 0) {
+      toast({ title: "No Data to Export", description: "Please generate a report or ensure there are payments to export.", variant: "destructive" });
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Overall Payment Report", 14, 22);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+
+    const tableColumnNames = paymentColumns.filter(col => col.accessorKey !== "actions").map(col => col.header);
+    const tableRows = dataToExport.map(payment => 
+      paymentColumns.filter(col => col.accessorKey !== "actions").map(col => {
+        if (col.accessorKey === 'amount') {
+          return payment.amount.toLocaleString();
+        }
+        if (col.accessorKey === 'datePaid') {
+          return new Date(payment.datePaid).toLocaleDateString();
+        }
+        return (payment as any)[col.accessorKey] ?? '';
+      })
+    );
+
+    (doc as any).autoTable({
+      head: [tableColumnNames],
+      body: tableRows,
+      startY: 30,
+      theme: 'grid',
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [255, 179, 0] }, // Accent color (approx)
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+    });
+
+    doc.save('overall-payment-report.pdf');
+    toast({ title: "PDF Exported", description: "Overall payment report has been downloaded." });
+  };
+
 
   return (
     <>
@@ -109,7 +151,7 @@ export default function PaymentReportsPage() {
         </CardHeader>
         <CardContent className="space-y-4 md:space-y-0 md:flex md:items-end md:gap-4">
           <div className="flex-1">
-            <label htmlFor="farmer-select" className="text-sm font-medium mb-1 block">Farmer (Optional)</label>
+            <Label htmlFor="farmer-select" className="text-sm font-medium mb-1 block">Farmer (Optional)</Label>
             <Select onValueChange={setSelectedFarmer} value={selectedFarmer}>
               <SelectTrigger id="farmer-select">
                 <SelectValue placeholder="All Farmers" />
@@ -136,11 +178,10 @@ export default function PaymentReportsPage() {
 
       <DataTable<Payment>
         columns={paymentColumns}
-        data={generatedReport.length > 0 ? generatedReport : mockPayments} // Show generated or all mock payments initially
+        data={generatedReport.length > 0 ? generatedReport : mockPayments} 
         searchKey="farmerName"
-        onExport={() => alert("Overall export CSV not yet implemented.")}
+        onExport={exportOverallReportToPDF}
       />
     </>
   );
 }
-
