@@ -105,11 +105,11 @@ export default function SettingsPage() {
           <CardTitle>System Summary Reports</CardTitle>
           <CardDescription>High-level overview of system activity. (More details on Dashboard)</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-            <div className="flex justify-between"><span>Total Liters Collected (All Time):</span> <strong>150,750 L</strong></div>
-            <div className="flex justify-between"><span>Total Payments Made (All Time):</span> <strong>UGX 180,900,000</strong></div>
-            <div className="flex justify-between"><span>Active Farmers:</span> <strong>125</strong></div>
-            <div className="flex justify-between"><span>Active MCC Operators:</span> <strong>2</strong></div>
+        <CardContent className="space-y-3 text-sm">
+            <div className="flex flex-col sm:flex-row sm:justify-between"><span>Total Liters Collected (All Time):</span> <strong className="mt-1 sm:mt-0">150,750 L</strong></div>
+            <div className="flex flex-col sm:flex-row sm:justify-between"><span>Total Payments Made (All Time):</span> <strong className="mt-1 sm:mt-0">UGX 180,900,000</strong></div>
+            <div className="flex flex-col sm:flex-row sm:justify-between"><span>Active Farmers:</span> <strong className="mt-1 sm:mt-0">125</strong></div>
+            <div className="flex flex-col sm:flex-row sm:justify-between"><span>Active MCC Operators:</span> <strong className="mt-1 sm:mt-0">2</strong></div>
         </CardContent>
       </Card>
     </>
