@@ -28,7 +28,7 @@ interface DataTableProps<T> {
   actionButtons?: React.ReactNode; // For global actions like "Add New"
 }
 
-export function DataTable<T extends { id: string }>({
+function DataTableInner<T extends { id: string }>({
   columns,
   data,
   searchKey,
@@ -37,6 +37,10 @@ export function DataTable<T extends { id: string }>({
 }: DataTableProps<T>) {
   const [filter, setFilter] = React.useState("");
   const [filteredData, setFilteredData] = React.useState(data);
+
+  React.useEffect(() => {
+    setFilteredData(data); // Reset filtered data when data prop changes
+  }, [data]);
 
   React.useEffect(() => {
     if (searchKey && filter) {
@@ -48,6 +52,7 @@ export function DataTable<T extends { id: string }>({
       });
       setFilteredData(newFilteredData);
     } else {
+      // If filter is cleared, reset to the original data passed in props
       setFilteredData(data);
     }
   }, [filter, data, searchKey]);
@@ -116,3 +121,5 @@ export function DataTable<T extends { id: string }>({
     </div>
   );
 }
+
+export const DataTable = React.memo(DataTableInner) as typeof DataTableInner;

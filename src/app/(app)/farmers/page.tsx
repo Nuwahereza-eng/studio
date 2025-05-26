@@ -14,45 +14,58 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { useToast } from "@/hooks/use-toast";
 
+// Define columns outside the component to ensure stable reference
+const farmerTableColumns = [
+  {
+    accessorKey: "avatar",
+    header: "",
+    cell: (row: Farmer) => (
+      <Avatar className="h-9 w-9">
+        <AvatarImage src={row.avatarUrl} alt={row.name} data-ai-hint="person" />
+        <AvatarFallback>{row.name.charAt(0)}</AvatarFallback>
+      </Avatar>
+    ),
+  },
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "phone", header: "Phone" },
+  { accessorKey: "location", header: "Location" },
+  { 
+    accessorKey: "joinDate", 
+    header: "Join Date",
+    cell: (row: Farmer) => new Date(row.joinDate).toLocaleDateString(),
+  },
+  {
+    accessorKey: "status", 
+    header: "Status",
+    cell: (row: Farmer) => <FarmerStatusBadge /> 
+  },
+  {
+    accessorKey: "actions",
+    header: "Actions",
+    cell: (row: Farmer) => (
+      <Button variant="outline" size="sm" asChild>
+        <Link href={`/farmers/${row.id}`}>
+          <Eye className="mr-2 h-4 w-4" /> View
+        </Link>
+      </Button>
+    ),
+  },
+];
+
+// Define PDF columns outside the component
+const pdfColumns = [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "phone", header: "Phone" },
+  { accessorKey: "location", header: "Location" },
+  { 
+    accessorKey: "joinDate", 
+    header: "Join Date",
+  },
+];
+
+
 export default function FarmersPage() {
   const { toast } = useToast();
-
-  const columns = [
-    {
-      accessorKey: "avatar",
-      header: "",
-      cell: (row: Farmer) => (
-        <Avatar className="h-9 w-9">
-          <AvatarImage src={row.avatarUrl} alt={row.name} data-ai-hint="person" />
-          <AvatarFallback>{row.name.charAt(0)}</AvatarFallback>
-        </Avatar>
-      ),
-    },
-    { accessorKey: "name", header: "Name" },
-    { accessorKey: "phone", header: "Phone" },
-    { accessorKey: "location", header: "Location" },
-    { 
-      accessorKey: "joinDate", 
-      header: "Join Date",
-      cell: (row: Farmer) => new Date(row.joinDate).toLocaleDateString(),
-    },
-    {
-      accessorKey: "status", 
-      header: "Status",
-      cell: (row: Farmer) => <FarmerStatusBadge /> 
-    },
-    {
-      accessorKey: "actions",
-      header: "Actions",
-      cell: (row: Farmer) => (
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/farmers/${row.id}`}>
-            <Eye className="mr-2 h-4 w-4" /> View
-          </Link>
-        </Button>
-      ),
-    },
-  ];
 
   const exportFarmersToPDF = () => {
     const doc = new jsPDF();
@@ -60,17 +73,6 @@ export default function FarmersPage() {
     doc.text("Farmers List Report", 14, 22);
     doc.setFontSize(11);
     doc.setTextColor(100);
-
-    // Define columns for PDF, excluding avatar, status, and actions
-    const pdfColumns = [
-      { accessorKey: "name", header: "Name" },
-      { accessorKey: "phone", header: "Phone" },
-      { accessorKey: "location", header: "Location" },
-      { 
-        accessorKey: "joinDate", 
-        header: "Join Date",
-      },
-    ];
 
     const tableColumnNames = pdfColumns.map(col => col.header);
     const tableRows = mockFarmers.map(farmer => 
@@ -112,7 +114,7 @@ export default function FarmersPage() {
         }
       />
       <DataTable<Farmer>
-        columns={columns}
+        columns={farmerTableColumns}
         data={mockFarmers}
         searchKey="name"
         onExport={exportFarmersToPDF}

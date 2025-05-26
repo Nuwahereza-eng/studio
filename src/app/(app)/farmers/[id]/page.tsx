@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useParams } from 'next/navigation';
@@ -13,15 +14,33 @@ import { DataTable } from '@/components/shared/data-table';
 import { MilkProductionTipsGenerator } from '@/components/features/milk-production-tips-generator';
 import { User, Edit, Droplets, CreditCard, Sparkles, MapPin, Phone, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
+import React from 'react'; // Import React for useMemo
+
+// Define columns outside the component for stable reference
+const farmerDetailDeliveryColumns = [
+  { accessorKey: 'date', header: 'Date', cell: (row: MilkDelivery) => new Date(row.date).toLocaleDateString() },
+  { accessorKey: 'time', header: 'Time' },
+  { accessorKey: 'quantityLiters', header: 'Quantity (L)' },
+  { accessorKey: 'quality', header: 'Quality' },
+];
+
+const farmerDetailPaymentColumns = [
+  { accessorKey: 'period', header: 'Period' },
+  { accessorKey: 'amount', header: 'Amount (UGX)', cell: (row: Payment) => row.amount.toLocaleString() },
+  { accessorKey: 'datePaid', header: 'Date Paid', cell: (row: Payment) => new Date(row.datePaid).toLocaleDateString() },
+];
+
 
 export default function FarmerDetailPage() {
   const params = useParams();
   const farmerId = params.id as string;
 
   // In a real app, fetch farmer data based on ID
-  const farmer = mockFarmers.find(f => f.id === farmerId);
-  const deliveries = mockMilkDeliveries.filter(d => d.farmerId === farmerId);
-  const payments = mockPayments.filter(p => p.farmerId === farmerId);
+  // For memoization, ensure these are stable or memoized if derived
+  const farmer = React.useMemo(() => mockFarmers.find(f => f.id === farmerId), [farmerId]);
+  const deliveries = React.useMemo(() => mockMilkDeliveries.filter(d => d.farmerId === farmerId), [farmerId]);
+  const payments = React.useMemo(() => mockPayments.filter(p => p.farmerId === farmerId), [farmerId]);
+
 
   if (!farmer) {
     return (
@@ -34,19 +53,6 @@ export default function FarmerDetailPage() {
       </>
     );
   }
-
-  const deliveryColumns = [
-    { accessorKey: 'date', header: 'Date', cell: (row: MilkDelivery) => new Date(row.date).toLocaleDateString() },
-    { accessorKey: 'time', header: 'Time' },
-    { accessorKey: 'quantityLiters', header: 'Quantity (L)' },
-    { accessorKey: 'quality', header: 'Quality' },
-  ];
-
-  const paymentColumns = [
-    { accessorKey: 'period', header: 'Period' },
-    { accessorKey: 'amount', header: 'Amount (UGX)', cell: (row: Payment) => row.amount.toLocaleString() },
-    { accessorKey: 'datePaid', header: 'Date Paid', cell: (row: Payment) => new Date(row.datePaid).toLocaleDateString() },
-  ];
 
   return (
     <>
@@ -118,7 +124,7 @@ export default function FarmerDetailPage() {
               <CardDescription>History of milk deliveries made by {farmer.name}.</CardDescription>
             </CardHeader>
             <CardContent>
-              <DataTable<MilkDelivery> columns={deliveryColumns} data={deliveries} searchKey="date" />
+              <DataTable<MilkDelivery> columns={farmerDetailDeliveryColumns} data={deliveries} searchKey="date" />
             </CardContent>
           </Card>
         </TabsContent>
@@ -130,7 +136,7 @@ export default function FarmerDetailPage() {
               <CardDescription>Payment history for {farmer.name}.</CardDescription>
             </CardHeader>
             <CardContent>
-              <DataTable<Payment> columns={paymentColumns} data={payments} searchKey="period" />
+              <DataTable<Payment> columns={farmerDetailPaymentColumns} data={payments} searchKey="period" />
             </CardContent>
           </Card>
         </TabsContent>

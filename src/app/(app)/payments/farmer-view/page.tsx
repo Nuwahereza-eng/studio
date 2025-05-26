@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,6 +9,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { mockFarmers, mockPayments, mockMilkDeliveries } from "@/lib/mock-data";
 import type { Payment, MilkDelivery, Farmer } from "@/types";
 import { DollarSign, FileText, Users } from "lucide-react";
+
+// Define columns outside the component for stable reference
+const farmerPaymentColumns = [
+  { accessorKey: "period", header: "Period" },
+  { accessorKey: "amount", header: "Amount (UGX)", cell: (row: Payment) => row.amount.toLocaleString() },
+  { accessorKey: "datePaid", header: "Date Paid", cell: (row: Payment) => new Date(row.datePaid).toLocaleDateString() },
+];
+
+const farmerDeliveryColumns = [
+  { accessorKey: 'date', header: 'Date', cell: (row: MilkDelivery) => new Date(row.date).toLocaleDateString() },
+  { accessorKey: 'time', header: 'Time' },
+  { accessorKey: 'quantityLiters', header: 'Quantity (L)' },
+  { accessorKey: 'quality', header: 'Quality' },
+];
+
 
 export default function FarmerPaymentViewPage() {
   const [selectedFarmerId, setSelectedFarmerId] = useState<string | undefined>(mockFarmers[0]?.id);
@@ -26,19 +42,6 @@ export default function FarmerPaymentViewPage() {
       setDeliveries([]);
     }
   }, [selectedFarmerId]);
-
-  const paymentColumns = [
-    { accessorKey: "period", header: "Period" },
-    { accessorKey: "amount", header: "Amount (UGX)", cell: (row: Payment) => row.amount.toLocaleString() },
-    { accessorKey: "datePaid", header: "Date Paid", cell: (row: Payment) => new Date(row.datePaid).toLocaleDateString() },
-  ];
-
-  const deliveryColumns = [
-    { accessorKey: 'date', header: 'Date', cell: (row: MilkDelivery) => new Date(row.date).toLocaleDateString() },
-    { accessorKey: 'time', header: 'Time' },
-    { accessorKey: 'quantityLiters', header: 'Quantity (L)' },
-    { accessorKey: 'quality', header: 'Quality' },
-  ];
 
   return (
     <>
@@ -76,7 +79,7 @@ export default function FarmerPaymentViewPage() {
             </CardHeader>
             <CardContent>
               {payments.length > 0 ? (
-                <DataTable<Payment> columns={paymentColumns} data={payments} />
+                <DataTable<Payment> columns={farmerPaymentColumns} data={payments} />
               ) : (
                 <p className="text-muted-foreground">No payment records found for this farmer.</p>
               )}
@@ -92,7 +95,7 @@ export default function FarmerPaymentViewPage() {
             </CardHeader>
             <CardContent>
               {deliveries.length > 0 ? (
-                <DataTable<MilkDelivery> columns={deliveryColumns} data={deliveries} />
+                <DataTable<MilkDelivery> columns={farmerDeliveryColumns} data={deliveries} />
               ) : (
                 <p className="text-muted-foreground">No delivery records found for this farmer.</p>
               )}
@@ -106,4 +109,3 @@ export default function FarmerPaymentViewPage() {
     </>
   );
 }
-

@@ -8,6 +8,7 @@ import { DataTable } from "@/components/shared/data-table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePickerWithRange } from "@/components/shared/date-picker-with-range";
+import { Label } from "@/components/ui/label"; // Added Label import
 import { mockFarmers, mockPayments, milkPricePerLiter, mockMilkDeliveries } from "@/lib/mock-data";
 import type { Payment, Farmer, MilkDelivery } from "@/types"; // Added MilkDelivery
 import { CreditCard, Download, BarChart3 } from "lucide-react";
@@ -17,28 +18,28 @@ import { format } from "date-fns";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
+// Define columns outside the component for stable reference
+const paymentTableColumns = [
+  { accessorKey: "farmerName", header: "Farmer Name" },
+  { accessorKey: "period", header: "Period" },
+  { accessorKey: "amount", header: "Amount (UGX)", cell: (row: Payment) => row.amount.toLocaleString() },
+  { accessorKey: "datePaid", header: "Date Paid", cell: (row: Payment) => new Date(row.datePaid).toLocaleDateString() },
+  {
+    accessorKey: "actions",
+    header: "Export",
+    cell: (row: Payment) => (
+      <Button variant="ghost" size="sm" onClick={() => alert(`Individual PDF export for ${row.farmerName} statement coming soon.`)}>
+        <Download className="h-4 w-4" />
+      </Button>
+    ),
+  },
+];
 
 export default function PaymentReportsPage() {
   const [selectedFarmer, setSelectedFarmer] = useState<string | undefined>(undefined);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [generatedReport, setGeneratedReport] = useState<Payment[]>([]);
   const { toast } = useToast();
-
-  const paymentColumns = [
-    { accessorKey: "farmerName", header: "Farmer Name" },
-    { accessorKey: "period", header: "Period" },
-    { accessorKey: "amount", header: "Amount (UGX)", cell: (row: Payment) => row.amount.toLocaleString() },
-    { accessorKey: "datePaid", header: "Date Paid", cell: (row: Payment) => new Date(row.datePaid).toLocaleDateString() },
-    {
-      accessorKey: "actions",
-      header: "Export",
-      cell: (row: Payment) => (
-        <Button variant="ghost" size="sm" onClick={() => alert(`Individual PDF export for ${row.farmerName} statement coming soon.`)}>
-          <Download className="h-4 w-4" />
-        </Button>
-      ),
-    },
-  ];
   
   const handleGenerateReport = () => {
     if (!selectedFarmer && !dateRange?.from && !dateRange?.to) {
@@ -109,9 +110,9 @@ export default function PaymentReportsPage() {
     doc.setFontSize(11);
     doc.setTextColor(100);
 
-    const tableColumnNames = paymentColumns.filter(col => col.accessorKey !== "actions").map(col => col.header);
+    const tableColumnNames = paymentTableColumns.filter(col => col.accessorKey !== "actions").map(col => col.header);
     const tableRows = dataToExport.map(payment => 
-      paymentColumns.filter(col => col.accessorKey !== "actions").map(col => {
+      paymentTableColumns.filter(col => col.accessorKey !== "actions").map(col => {
         if (col.accessorKey === 'amount') {
           return payment.amount.toLocaleString();
         }
@@ -167,8 +168,8 @@ export default function PaymentReportsPage() {
             </Select>
           </div>
           <div className="flex-1">
-            <label htmlFor="date-range" className="text-sm font-medium mb-1 block">Date Range (Required for new calculation)</label>
-             <DatePickerWithRange date={dateRange} onDateChange={setDateRange} />
+            <Label htmlFor="date-range-picker" className="text-sm font-medium mb-1 block">Date Range (Required for new calculation)</Label>
+             <DatePickerWithRange id="date-range-picker" date={dateRange} onDateChange={setDateRange} />
           </div>
           <Button onClick={handleGenerateReport} className="w-full md:w-auto">
             <BarChart3 className="mr-2 h-4 w-4" /> Generate Report
@@ -177,7 +178,7 @@ export default function PaymentReportsPage() {
       </Card>
 
       <DataTable<Payment>
-        columns={paymentColumns}
+        columns={paymentTableColumns}
         data={generatedReport.length > 0 ? generatedReport : mockPayments} 
         searchKey="farmerName"
         onExport={exportOverallReportToPDF}

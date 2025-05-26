@@ -15,17 +15,18 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { useToast } from "@/hooks/use-toast";
 
+// Define columns outside the component for stable reference
+const deliveryTableColumns = [
+  { accessorKey: 'date', header: 'Date', cell: (row: MilkDelivery) => new Date(row.date).toLocaleDateString() },
+  { accessorKey: 'time', header: 'Time' },
+  { accessorKey: 'farmerName', header: 'Farmer Name' },
+  { accessorKey: 'quantityLiters', header: 'Quantity (L)' },
+  { accessorKey: 'quality', header: 'Quality' },
+  { accessorKey: 'recordedBy', header: 'Recorded By' },
+];
+
 export default function DeliveriesPage() {
   const { toast } = useToast();
-
-  const deliveryColumns = [
-    { accessorKey: 'date', header: 'Date', cell: (row: MilkDelivery) => new Date(row.date).toLocaleDateString() },
-    { accessorKey: 'time', header: 'Time' },
-    { accessorKey: 'farmerName', header: 'Farmer Name' },
-    { accessorKey: 'quantityLiters', header: 'Quantity (L)' },
-    { accessorKey: 'quality', header: 'Quality' },
-    { accessorKey: 'recordedBy', header: 'Recorded By' },
-  ];
 
   const exportDeliveriesToPDF = () => {
     const doc = new jsPDF();
@@ -34,9 +35,9 @@ export default function DeliveriesPage() {
     doc.setFontSize(11);
     doc.setTextColor(100);
 
-    const tableColumnNames = deliveryColumns.map(col => col.header);
+    const tableColumnNames = deliveryTableColumns.map(col => col.header);
     const tableRows = mockMilkDeliveries.map(delivery => 
-      deliveryColumns.map(col => {
+      deliveryTableColumns.map(col => {
         if (col.accessorKey === 'date') {
           return new Date(delivery.date).toLocaleDateString();
         }
@@ -84,7 +85,7 @@ export default function DeliveriesPage() {
             </CardHeader>
             <CardContent>
               <DataTable<MilkDelivery>
-                columns={deliveryColumns}
+                columns={deliveryTableColumns}
                 data={mockMilkDeliveries}
                 searchKey="farmerName"
                 onExport={exportDeliveriesToPDF}

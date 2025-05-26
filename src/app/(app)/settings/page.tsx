@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -24,6 +25,20 @@ const mockOperators: Operator[] = [
   { id: "OP003", name: "Charlie Brown", role: "MCC Operator", status: "Inactive" },
 ];
 
+// Define columns outside the component for stable reference
+const operatorTableColumns = [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "role", header: "Role" },
+  { accessorKey: "status", header: "Status" },
+  {
+    accessorKey: "actions",
+    header: "Actions",
+    cell: (row: Operator) => (
+      <Button variant="outline" size="sm" disabled>Edit</Button>
+    ),
+  },
+];
+
 export default function SettingsPage() {
   const [milkPrice, setMilkPrice] = useState(initialMilkPrice.toString());
   const { toast } = useToast();
@@ -38,19 +53,6 @@ export default function SettingsPage() {
     console.log("New milk price:", price);
     toast({ title: "Price Updated", description: `Milk buying price set to UGX ${price}/liter.` });
   };
-
-  const operatorColumns = [
-    { accessorKey: "name", header: "Name" },
-    { accessorKey: "role", header: "Role" },
-    { accessorKey: "status", header: "Status" },
-    {
-      accessorKey: "actions",
-      header: "Actions",
-      cell: (row: Operator) => (
-        <Button variant="outline" size="sm" disabled>Edit</Button>
-      ),
-    },
-  ];
 
   return (
     <>
@@ -89,7 +91,7 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <DataTable<Operator>
-              columns={operatorColumns}
+              columns={operatorTableColumns}
               data={mockOperators}
               searchKey="name"
               actionButtons={
