@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 import { Button, type ButtonProps } from "@/components/ui/button" // Import ButtonProps
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet" // Added SheetHeader, SheetTitle
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
@@ -207,6 +207,9 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
+            <SheetHeader className="sr-only">
+              <SheetTitle>Navigation Menu</SheetTitle>
+            </SheetHeader>
             <div className="flex h-full w-full flex-col">{children}</div>
           </SheetContent>
         </Sheet>
@@ -776,3 +779,5 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
+    
