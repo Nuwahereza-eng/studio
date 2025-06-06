@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 import { Button, type ButtonProps } from "@/components/ui/button" // Import ButtonProps
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet" // Added SheetHeader, SheetTitle
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
@@ -266,7 +266,7 @@ Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
-  ButtonProps // Use ButtonProps directly
+  ButtonProps
 >(({ className, onClick, children, ...props }, ref) => {
   const { toggleSidebar } = useSidebar()
 
@@ -281,21 +281,15 @@ const SidebarTrigger = React.forwardRef<
     <Button
       ref={ref}
       data-sidebar="trigger"
-      variant="ghost" // Default variant, can be overridden by props
-      size="icon"   // Default size, can be overridden by props
-      className={cn("h-7 w-7", className)} // Default className, merged with passed className
+      variant={props.variant || "ghost"}
+      size={props.size || "icon"}
+      className={cn("h-7 w-7", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
       }}
-      {...props} // Spread other props, including variant, size, and asChild if passed
+      {...props}
     >
-      {/* If children are provided (e.g. when asChild is true and a child component is passed),
-          Button component's asChild logic will handle it.
-          Otherwise, use default icon and text.
-          If asChild is true from props, Button becomes Slot; if children are also from props, Slot gets those.
-          If asChild is false, Button is <button>; if children are from props, <button> gets those, else default.
-      */}
       {props.asChild && children ? children : (children || defaultChildren)}
     </Button>
   )
@@ -563,8 +557,8 @@ const SidebarMenuButton = React.forwardRef<
     {
       asChild = false,
       isActive = false,
-      variant = "default",
-      size = "default",
+      variant, // Use variant from props, CVA handles default
+      size,    // Use size from props, CVA handles default
       tooltip,
       className,
       ...props
