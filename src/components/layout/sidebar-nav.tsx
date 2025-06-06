@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -67,7 +68,7 @@ export function SidebarNav() {
                 </SidebarGroupLabel>
                  {item.subItems.map((subItem) => (
                   <SidebarMenuItem key={subItem.href}>
-                    <Link href={subItem.href} legacyBehavior passHref>
+                    <Link href={subItem.href}  passHref>
                       <SidebarMenuButton
                         asChild
                         isActive={pathname === subItem.href || (pathname.startsWith(subItem.href) && subItem.href !== '/')}
@@ -85,19 +86,17 @@ export function SidebarNav() {
               </SidebarGroup>
             ) : (
               <SidebarMenuItem key={item.href}>
-                <Link href={item.href} legacyBehavior passHref>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/')}
-                    tooltip={{ children: item.label, side: 'right', className: 'ml-2' }}
-                    className="justify-start"
-                  >
-                    <a>
-                      <item.icon />
-                      <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </Link>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/')}
+                  tooltip={{ children: item.label, side: 'right', className: 'ml-2' }}
+                  className="justify-start"
+                >
+                  <Link href={item.href}>
+                    <item.icon />
+                    <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             )
           )}
@@ -108,9 +107,17 @@ export function SidebarNav() {
           <LogOut className="mr-2 h-4 w-4" /> {/* Added LogOut icon */}
           Log Out
         </Button>
-         <Button variant="ghost" size="icon" className="hidden group-data-[collapsible=icon]:flex mx-auto" tooltip={{children: "Log Out", side: "right", className: "ml-2"}}>
-          <LogOut /> {/* Changed icon to LogOut */}
-        </Button>
+         {/* Wrap the Button with a Tooltip component */}
+         <Tooltip>
+           <TooltipTrigger asChild>
+             <Button variant="ghost" size="icon" className="hidden group-data-[collapsible=icon]:flex mx-auto">
+               <LogOut /> {/* Changed icon to LogOut */}
+             </Button>
+           </TooltipTrigger>
+           <TooltipContent side="right" className="ml-2">
+             Log Out
+           </TooltipContent>
+         </Tooltip>
       </SidebarFooter>
     </Sidebar>
   );
