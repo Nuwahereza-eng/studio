@@ -68,19 +68,17 @@ export function SidebarNav() {
                 </SidebarGroupLabel>
                  {item.subItems.map((subItem) => (
                   <SidebarMenuItem key={subItem.href}>
-                    <Link href={subItem.href}  passHref>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === subItem.href || (pathname.startsWith(subItem.href) && subItem.href !== '/')}
-                        tooltip={{ children: subItem.label, side: 'right', className: 'ml-2' }}
-                        className="justify-start"
-                      >
-                        <a>
-                          <subItem.icon />
-                          <span className="group-data-[collapsible=icon]:hidden">{subItem.label}</span>
-                        </a>
-                      </SidebarMenuButton>
-                    </Link>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === subItem.href || (pathname.startsWith(subItem.href) && subItem.href !== '/')}
+                      tooltip={{ children: subItem.label, side: 'right', className: 'ml-2' }}
+                      className="justify-start"
+                    >
+                      <Link href={subItem.href}>
+                        <subItem.icon />
+                        <span className="group-data-[collapsible=icon]:hidden">{subItem.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
               </SidebarGroup>
@@ -103,15 +101,14 @@ export function SidebarNav() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-4 mt-auto">
-        <Button variant="secondary" className="w-full group-data-[collapsible=icon]:hidden"> {/* Changed variant to secondary */}
-          <LogOut className="mr-2 h-4 w-4" /> {/* Added LogOut icon */}
+        <Button variant="secondary" className="w-full group-data-[collapsible=icon]:hidden">
+          <LogOut className="mr-2 h-4 w-4" />
           Log Out
         </Button>
-         {/* Wrap the Button with a Tooltip component */}
          <Tooltip>
            <TooltipTrigger asChild>
              <Button variant="ghost" size="icon" className="hidden group-data-[collapsible=icon]:flex mx-auto">
-               <LogOut /> {/* Changed icon to LogOut */}
+               <LogOut />
              </Button>
            </TooltipTrigger>
            <TooltipContent side="right" className="ml-2">
