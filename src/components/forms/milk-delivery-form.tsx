@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,7 +32,7 @@ import { mockFarmers } from "@/lib/mock-data"; // For farmer selection
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
 const deliverySchema = z.object({
-  farmerId: z.string({ required_error: "Please select a farmer." }),
+  farmerId: z.string({ required_error: "Please select a farmer." }).min(1, "Please select a farmer."), // Ensure non-empty
   date: z.date({ required_error: "Delivery date is required." }),
   time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)."),
   quantityLiters: z.coerce.number().min(0.1, "Quantity must be greater than 0."),
@@ -45,8 +46,10 @@ export function MilkDeliveryForm() {
   const form = useForm<DeliveryFormValues>({
     resolver: zodResolver(deliverySchema),
     defaultValues: {
-      time: format(new Date(), "HH:mm"), // Default to current time
-      date: new Date(), // Default to today
+      farmerId: "", // Initialize as empty string
+      quantityLiters: "", // Initialize as empty string
+      time: format(new Date(), "HH:mm"),
+      date: new Date(),
       quality: "Good",
     },
   });
@@ -57,9 +60,9 @@ export function MilkDeliveryForm() {
       title: "Milk Delivery Recorded",
       description: `Delivery for farmer ID ${data.farmerId} of ${data.quantityLiters}L recorded.`,
     });
-    form.reset({ 
-        farmerId: '', 
-        quantityLiters: 0, 
+    form.reset({
+        farmerId: '',
+        quantityLiters: "", // Reset to empty string to show placeholder
         quality: 'Good',
         time: format(new Date(), "HH:mm"),
         date: new Date(),
@@ -81,7 +84,7 @@ export function MilkDeliveryForm() {
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Farmer</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}> {/* Ensure value is passed */}
                         <FormControl>
                         <SelectTrigger>
                             <SelectValue placeholder="Select a farmer" />
@@ -175,7 +178,7 @@ export function MilkDeliveryForm() {
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Milk Quality</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}> {/* Ensure value is passed */}
                         <FormControl>
                         <SelectTrigger>
                             <SelectValue placeholder="Select quality" />
