@@ -59,7 +59,7 @@ export default function DashboardPage() {
         actions={
           <div className="flex gap-2">
             <Button asChild>
-              <Link href="/deliveries/record">
+              <Link href="/deliveries">
                 <PlusCircle className="mr-2 h-4 w-4" /> Record Delivery
               </Link>
             </Button>
